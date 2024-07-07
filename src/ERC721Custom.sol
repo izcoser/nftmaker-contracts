@@ -5,6 +5,7 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "forge-std/console.sol";
 
 contract ERC721Custom is ERC721Enumerable, Ownable {
     string private _uri;
@@ -24,6 +25,7 @@ contract ERC721Custom is ERC721Enumerable, Ownable {
     }
 
     error ERC721CustomMaxSupplyReached(uint256 maxSupply_);
+    error ERC721CustomInvalidProof(bytes32[] proof);
 
     function _baseURI() internal view override returns (string memory) {
         return _uri;
@@ -42,8 +44,17 @@ contract ERC721Custom is ERC721Enumerable, Ownable {
         _safeMint(msg.sender, supply);
     }
 
-    // function mintWhitelist(bytes32[] memory proof, address account) external {
-    //     bytes32 leaf = keccak256(abi.encodePacked(account));
-    //     require(MerkleProof.verify(proof, merkleRoot, leaf), "Invalid proof");
-    // }
+    function mintWhiteList(
+        bytes32[] memory proof,
+        bytes32 merkleRoot,
+        address account
+    ) external {
+        bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(account))));
+        console.logBytes32(leaf);
+        if (!MerkleProof.verify(proof, merkleRoot, leaf)) {
+            revert ERC721CustomInvalidProof(proof);
+        }
+
+        _safeMint(msg.sender, totalSupply());
+    }
 }

@@ -2,12 +2,16 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {Counter} from "../src/Counter.sol";
 import {ERC721Custom} from "../src/ERC721Custom.sol";
 
 contract ERC721CustomTest is Test {
     ERC721Custom public erc721Custom;
     address public owner = address(uint160(uint256(1)));
+    address public notInList = address(uint160(uint256(5)));
+    // Merkle Root of tree with address values: [ ["0x...01"], ["0x...02"] ]
+    bytes32 public merkleRoot =
+        0xe685571b7e25a4a0391fb8daa09dc8d3fbb3382504525f89a2334fbbf8f8e92c;
+    bytes32[] public proofOwnerIsInTree;
 
     function setUp() public {
         erc721Custom = new ERC721Custom(
@@ -16,6 +20,9 @@ contract ERC721CustomTest is Test {
             "dummy_uri",
             2,
             owner
+        );
+        proofOwnerIsInTree.push(
+            0x1ab0c6948a275349ae45a06aad66a8bd65ac18074615d53676c09b67809099e0
         );
     }
 
@@ -36,5 +43,15 @@ contract ERC721CustomTest is Test {
         erc721Custom.mint();
         erc721Custom.mint();
         vm.stopPrank();
+    }
+
+    function test_mintWhitelist() public {
+        vm.startPrank(owner);
+        erc721Custom.mintWhiteList(proofOwnerIsInTree, merkleRoot, owner);
+    }
+
+    function testFail_mintWhitelistNotInList() public {
+        vm.startPrank(notInList);
+        erc721Custom.mintWhiteList(proofOwnerIsInTree, merkleRoot, notInList);
     }
 }
