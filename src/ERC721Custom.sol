@@ -8,6 +8,20 @@ import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProo
 import "forge-std/console.sol";
 
 contract ERC721Custom is ERC721Enumerable, Ownable {
+    struct FriendCollection {
+        bytes32 merkleRoot;
+        uint256 mintSlotsTotal;
+        uint256 mintSlotsPerUser;
+        uint256 mintPrice;
+    }
+
+    struct BasicInfo {
+        bool publicMint;
+        uint256 publicMintSlots;
+        uint256 publicMintPrice;
+        uint256 snapshotBlockNumber;
+    }
+
     string private _uri;
     uint256 public maxSupply;
 
@@ -18,7 +32,9 @@ contract ERC721Custom is ERC721Enumerable, Ownable {
         string memory symbol_,
         string memory uri_,
         uint256 maxSupply_,
-        address owner_
+        address owner_,
+        BasicInfo memory basicInfo_,
+        FriendCollection[] memory friendCollections
     ) ERC721(name_, symbol_) Ownable(owner_) {
         _uri = uri_;
         maxSupply = maxSupply_;

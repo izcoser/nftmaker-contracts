@@ -13,13 +13,33 @@ contract ERC721CustomTest is Test {
         0xe685571b7e25a4a0391fb8daa09dc8d3fbb3382504525f89a2334fbbf8f8e92c;
     bytes32[] public proofOwnerIsInTree;
 
+    ERC721Custom.BasicInfo basicInfo =
+        ERC721Custom.BasicInfo({
+            publicMint: true,
+            publicMintPrice: 1 ether,
+            publicMintSlots: 10000,
+            snapshotBlockNumber: 0
+        });
+
+    ERC721Custom.FriendCollection[] friendCollections;
+    ERC721Custom.FriendCollection fc =
+        ERC721Custom.FriendCollection({
+            merkleRoot: merkleRoot,
+            mintSlotsTotal: 20,
+            mintSlotsPerUser: 1,
+            mintPrice: 1 wei
+        });
+
     function setUp() public {
+        friendCollections.push(fc);
         erc721Custom = new ERC721Custom(
             "Test NFT",
             "TEST",
             "dummy_uri",
             2,
-            owner
+            owner,
+            basicInfo,
+            friendCollections
         );
         proofOwnerIsInTree.push(
             0x1ab0c6948a275349ae45a06aad66a8bd65ac18074615d53676c09b67809099e0
